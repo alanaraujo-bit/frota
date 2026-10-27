@@ -6,9 +6,8 @@ const dir = new URL("../public/icons/", import.meta.url);
 const svg = readFileSync(new URL("icon.svg", dir), "utf8");
 // Maskable/Apple: fundo cheio (sem cantos arredondados) e marca dentro da zona segura de 80%.
 const full = svg
-  .replace('rx="112" fill="#14161b"', 'fill="#14161b"')
-  .replace("<g>", '<g transform="translate(256 256) scale(0.82) translate(-256 -256)">')
-  ;
+  .replaceAll(' rx="112"', "")
+  .replace('<g id="mark">', '<g id="mark" transform="translate(256 256) scale(0.82) translate(-256 -256)">');
 
 const out = async (src, size, name) =>
   sharp(Buffer.from(src), { density: 384 }).resize(size, size).png().toFile(new URL(name, dir).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
