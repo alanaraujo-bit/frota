@@ -15,6 +15,7 @@ const ACTIONS: Record<string, string> = {
   upload: "anexou documento em",
   replace: "substituiu documento em",
   delete: "excluiu documento de",
+  delete_user: "excluiu",
   invite: "convidou",
   invite_link: "gerou novo convite para",
   password_reset_link: "gerou link de redefinição para",

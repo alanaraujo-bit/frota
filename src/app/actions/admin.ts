@@ -118,3 +118,20 @@ export async function updateUser(userId: string, patch: { role?: "ADMIN" | "LEIT
     return { ok: data.active === false ? "Acesso desativado" : data.active ? "Acesso reativado" : "Papel alterado" };
   });
 }
+
+export async function deleteUser(userId: string): Promise<Result> {
+  return run(async () => {
+    const admin = await assertUser(true);
+    if (userId === admin.id) return { error: "Você não pode excluir a própria conta." };
+    const user = await db.user.findUnique({ where: { id: userId }, include: { _count: { select: { documents: true } } } });
+    if (!user) return { error: "Usuário não encontrado." };
+    // Documentos guardam quem os enviou; apagar o autor quebraria esse histórico.
+    if (user._count.documents > 0)
+      return { error: `Esta pessoa enviou ${user._count.documents} documento(s) e não pode ser excluída. Use “Desativar”.` };
+    // Sessões, convites e acessos recentes saem junto (onDelete: Cascade).
+    await db.user.delete({ where: { id: userId } });
+    await audit(admin.id, "delete_user", "user", userId, { email: user.email, nome: user.name, papel: user.role });
+    revalidatePath("/usuarios");
+    return { ok: "Usuário excluído" };
+  });
+}

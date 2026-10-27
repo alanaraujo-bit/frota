@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { inviteUser, regenerateLink, updateUser } from "@/app/actions/admin";
+import { deleteUser, inviteUser, regenerateLink, updateUser } from "@/app/actions/admin";
 import { CheckIcon, PlusIcon, ShieldIcon } from "./icons";
 import { Sheet } from "./sheet";
 import { toast } from "./toast";
@@ -59,6 +59,7 @@ export function UsersManager({ users, meId }: { users: UserRow[]; meId: string }
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState<{ link: string; name: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<UserRow | null>(null);
   const [pending, start] = useTransition();
 
   const invite = (form: FormData) =>
@@ -137,6 +138,9 @@ export function UsersManager({ users, meId }: { users: UserRow[]; meId: string }
                   <Button variant="ghost" size="sm" disabled={pending} onClick={() => act(() => updateUser(u.id, { active: !u.active }))}>
                     {u.active ? "Desativar" : "Reativar"}
                   </Button>
+                  <Button variant="ghost" size="sm" disabled={pending} onClick={() => setDeleting(u)} className="text-danger">
+                    Excluir
+                  </Button>
                 </>
               )}
             </div>
@@ -171,6 +175,28 @@ export function UsersManager({ users, meId }: { users: UserRow[]; meId: string }
             </Button>
           </form>
         )}
+      </Sheet>
+
+      <Sheet open={!!deleting} onClose={() => setDeleting(null)} title={`Excluir ${deleting?.name ?? ""}?`}>
+        <p className="text-sm text-muted">
+          A conta de {deleting?.email} é apagada de vez, com sessões e links de acesso. Não dá para desfazer. Para só bloquear o acesso, use “Desativar”.
+        </p>
+        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button variant="ghost" onClick={() => setDeleting(null)} disabled={pending}>
+            Cancelar
+          </Button>
+          <Button
+            variant="danger"
+            disabled={pending}
+            onClick={() => {
+              const id = deleting!.id;
+              setDeleting(null);
+              act(() => deleteUser(id));
+            }}
+          >
+            {pending ? "Excluindo…" : "Excluir pessoa"}
+          </Button>
+        </div>
       </Sheet>
     </>
   );
