@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  LEITURA
+}
+
+enum DocumentType {
+  CRLV
+  VISTORIA
+  SEGURO
+  OUTRO
+}
+
+enum DocumentStatus {
+  PENDENTE
+  PRONTO
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  name         String
+  role         Role      @default(LEITURA)
+  passwordHash String?
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  sessions  Session[]
+  invites   Invite[]      @relation("InviteUser")
+  views     VehicleView[]
+  documents Document[]
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([userId])
+}
+
+/// Link de uso único para definir senha: convite, bootstrap do admin e redefinição.
+model Invite {
+  id          String    @id @default(uuid())
+  tokenHash   String    @unique
+  userId      String
+  user        User      @relation("InviteUser", fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdById String?
+  createdAt   DateTime  @default(now())
+}
+
+model LoginAttempt {
+  id        String   @id @default(uuid())
+  email     String
+  ip        String
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+}
+
+model Group {
+  id             String    @id @default(uuid())
+  name           String
+  document       String?
+  documentType   String?
+  /// Chave da aba de origem na planilha (seed idempotente). Nula para grupos criados no app.
+  sourceKey      String?   @unique
+  sourceTitle    String?
+  sortOrder      Int       @default(0)
+  archivedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  vehicles Vehicle[]
+}
+
+model Vehicle {
+  id               String    @id @default(uuid())
+  groupId          String
+  group            Group     @relation(fields: [groupId], references: [id])
+  plate            String
+  /// Placa só com letras e dígitos, maiúscula (busca e aviso de conflito).
+  plateKey         String
+  plateNeedsReview Boolean   @default(false)
+  renavam          String?
+  chassis          String?
+  makeModel        String?
+  year             String?
+  color            String?
+  /// Campo DATA da planilha: texto como veio (mês ou data). Não é vencimento.
+  sheetReference   String?
+  sheetReferenceAt DateTime? @db.Date
+  inspection       String?
+  legacyStatus     String?
+  sheetStatus      String?
+  /// Pares rótulo/valor de responsáveis e contatos, preservados verbatim.
+  contacts         Json      @default("[]")
+  notes            String?
+  /// Alertas de importação/revisão: [{codigo, mensagem}].
+  alerts           Json      @default("[]")
+  sheetOrder       Int?
+  sourceKey        String?   @unique
+  sourceRaw        Json?
+  archivedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  documents Document[]
+  views     VehicleView[]
+
+  @@index([plateKey])
+  @@index([groupId])
+}
+
+model Document {
+  id           String         @id @default(uuid())
+  vehicleId    String
+  vehicle      Vehicle        @relation(fields: [vehicleId], references: [id])
+  type         DocumentType
+  title        String
+  documentDate DateTime?      @db.Date
+  fileName     String
+  mime         String
+  size         Int
+  chunkCount   Int
+  chunksStored Int            @default(0)
+  /// Chave de dados AES-256-GCM do arquivo, cifrada com a chave mestra (envelope).
+  wrappedKey   String
+  status       DocumentStatus @default(PENDENTE)
+  replacesId   String?
+  uploadedById String
+  uploadedBy   User           @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime       @default(now())
+  deletedAt    DateTime?
+  purgedAt     DateTime?
+
+  @@index([vehicleId, status, deletedAt])
+}
+
+model VehicleView {
+  userId    String
+  vehicleId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+
+  @@id([userId, vehicleId])
+  @@index([userId, viewedAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}

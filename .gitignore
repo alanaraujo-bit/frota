@@ -39,3 +39,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+!.env.example
+/.pgdata
+/.storage
+/.storage-test
+/src/generated
+/test-results
+/playwright-report
+/backups
+/.dev-credentials
+/.storage-e2e
+/tests/e2e/.auth.json
+
+# dados reais do cliente (LGPD): nunca no repo
+/frota_seed.json
+/diagnostico_frota.md
+*.xlsx

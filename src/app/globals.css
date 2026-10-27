@@ -1,26 +1,343 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --bg: #f4f4f1;
+  --surface: #ffffff;
+  --surface-2: #fafaf8;
+  --ink: #14161b;
+  --ink-2: #353a45;
+  --muted: #666c79;
+  --line: #e2e2dc;
+  --line-strong: #cbcbc3;
+  --accent: #0b5a53;
+  --accent-hover: #084842;
+  --accent-soft: #e2eeeb;
+  --warn: #7a4f00;
+  --warn-soft: #fbf0d9;
+  --danger: #a3241a;
+  --danger-soft: #fbe8e5;
+  --ok: #1d6638;
+  --ok-soft: #e4f1e8;
+  --plate-blue: #0b3d91;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  /* Altura reservada para a barra de abas flutuante + barra de gestos do aparelho. */
+  --tabbar-space: calc(88px + var(--safe-bottom));
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-plate-blue: var(--plate-blue);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  /* Sem zoom de duplo toque e sem "elástico"/puxar-para-atualizar do navegador. */
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+/* Trava a rolagem do fundo com folha/modal aberto. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* Telas de toque: sem barras de rolagem, sem menu de toque longo em links/imagens, sem seleção na interface. */
+@media (pointer: coarse) {
+  * {
+    scrollbar-width: none;
   }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+  a,
+  img {
+    -webkit-touch-callout: none;
+  }
+}
+a,
+button,
+nav,
+label,
+summary,
+[role="tab"],
+[role="option"],
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="date"] {
+  min-height: 2.75rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overscroll-behavior: none;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Diálogos nativos: folha inferior no celular, modal centralizado no desktop. */
+dialog.sheet {
+  margin: auto auto 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 92dvh;
+  border: 0;
+  border-radius: 20px 20px 0 0;
+  padding: 0;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 -10px 40px rgb(20 22 27 / 0.18);
+}
+dialog.sheet::backdrop {
+  background: rgb(20 22 27 / 0.42);
+  backdrop-filter: blur(2px);
+}
+dialog.sheet[open] {
+  animation: sheet-up 260ms var(--ease-out-soft);
+}
+@media (min-width: 768px) {
+  dialog.sheet {
+    margin: auto;
+    width: min(560px, calc(100% - 48px));
+    border-radius: 18px;
+    box-shadow: 0 24px 64px rgb(20 22 27 / 0.24);
+  }
+  dialog.sheet[open] {
+    animation: pop-in 180ms var(--ease-out-soft);
+  }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes pop-in {
+  from { transform: translateY(6px) scale(0.985); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-in {
+  animation: fade-in 220ms var(--ease-out-soft) both;
+}
+.stagger > * {
+  animation: fade-in 320ms var(--ease-out-soft) both;
+}
+.stagger > *:nth-child(2) { animation-delay: 40ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; }
+.stagger > *:nth-child(5) { animation-delay: 160ms; }
+.stagger > *:nth-child(n + 6) { animation-delay: 200ms; }
+
+/* Placa "carimbada" ao abrir a ficha. */
+@keyframes plate-in {
+  0% { opacity: 0; transform: translateY(10px) rotateX(18deg) scale(0.96); }
+  60% { opacity: 1; transform: translateY(-2px) rotateX(0) scale(1.01); }
+  100% { opacity: 1; transform: none; }
+}
+.plate-in {
+  animation: plate-in 520ms var(--ease-out-soft) both;
+  transform-origin: 50% 100%;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+.toast-in {
+  animation: toast-in 260ms var(--ease-out-soft) both;
+}
+
+/* Conclusão de envio: traço do check desenhado. */
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+.check-draw path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: draw 420ms 120ms var(--ease-out-soft) forwards;
+}
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.pop {
+  animation: pop 380ms var(--ease-out-soft) both;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgb(20 22 27 / 0.05) 25%, rgb(20 22 27 / 0.09) 50%, rgb(20 22 27 / 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* ---------- Vidro líquido ---------- */
+@layer components {
+.glass {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.5));
+  -webkit-backdrop-filter: blur(22px) saturate(1.9);
+  backdrop-filter: blur(22px) saturate(1.9);
+  border: 1px solid rgb(255 255 255 / 0.65);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 -1px 1px rgb(255 255 255 / 0.25),
+    0 12px 32px -12px rgb(20 22 27 / 0.32),
+    0 2px 6px rgb(20 22 27 / 0.06);
+}
+.glass-bar {
+  background: rgb(244 244 241 / 0.72);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  backdrop-filter: blur(20px) saturate(1.8);
+}
+.glass-bubble {
+  background: linear-gradient(180deg, rgb(20 22 27 / 0.09), rgb(20 22 27 / 0.05));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.7),
+    inset 0 0 0 0.5px rgb(20 22 27 / 0.06);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-bar {
+    background: rgb(250 250 248 / 0.97);
+  }
+}
+
+}
+
+/* Fundo ambiente sutil, para o vidro ter o que refratar. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 35% at 0% 0%, rgb(11 90 83 / 0.1), transparent 70%),
+    radial-gradient(45% 30% at 100% 35%, rgb(11 61 145 / 0.07), transparent 70%),
+    radial-gradient(60% 35% at 50% 100%, rgb(11 90 83 / 0.08), transparent 70%);
+}
+
+/* Fechamento das folhas (animação de saída). */
+@keyframes sheet-down {
+  to { transform: translateY(100%); opacity: 0.6; }
+}
+@keyframes pop-out {
+  to { transform: translateY(6px) scale(0.985); opacity: 0; }
+}
+dialog.sheet[data-closing] {
+  animation: sheet-down 220ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+dialog.sheet[data-closing]::backdrop {
+  opacity: 0;
+  transition: opacity 200ms;
+}
+@media (min-width: 768px) {
+  dialog.sheet[data-closing] {
+    animation: pop-out 150ms ease-in forwards;
+  }
+}
+
+/* ---------- Transições de tela (View Transitions) ---------- */
+::view-transition-group(.morph) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+@keyframes via-blur {
+  30% { filter: blur(2px); }
+}
+@keyframes vt-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes vt-slide {
+  from { translate: var(--slide-offset) 0; }
+  to { translate: 0 0; }
+}
+::view-transition-old(.nav-forward) {
+  --slide-offset: -48px;
+  animation: 140ms ease-in both vt-fade reverse, 360ms cubic-bezier(0.22, 1, 0.36, 1) both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --slide-offset: 48px;
+  animation: 220ms ease-out 100ms both vt-fade, 360ms cubic-bezier(0.22, 1, 0.36, 1) both vt-slide;
+}
+::view-transition-old(.nav-back) {
+  --slide-offset: 48px;
+  animation: 140ms ease-in both vt-fade reverse, 360ms cubic-bezier(0.22, 1, 0.36, 1) both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --slide-offset: -48px;
+  animation: 220ms ease-out 100ms both vt-fade, 360ms cubic-bezier(0.22, 1, 0.36, 1) both vt-slide;
+}
+::view-transition-old(.nav-tab) {
+  animation: 120ms ease-in both vt-fade reverse;
+}
+::view-transition-new(.nav-tab) {
+  animation: 200ms ease-out 60ms both vt-fade;
 }
