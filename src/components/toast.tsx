@@ -35,7 +35,7 @@ export function Toaster() {
         <div
           key={t.id}
           role={t.tone === "error" ? "alert" : "status"}
-          className="toast-in pointer-events-auto flex max-w-sm items-center gap-2.5 rounded-full bg-ink py-2.5 pl-3 pr-4 text-[14px] font-medium text-white shadow-[0_12px_32px_-8px_rgb(20_22_27/0.45)]"
+          className="toast-in pointer-events-auto flex max-w-sm items-center gap-2.5 rounded-full bg-ink py-2.5 pl-3 pr-4 text-[14px] font-medium text-on-solid shadow-[0_12px_32px_-8px_rgb(20_22_27/0.45)]"
         >
           <span className={cx("grid size-6 place-items-center rounded-full", t.tone === "ok" ? "bg-ok" : "bg-danger")}>
             {t.tone === "ok" ? <CheckIcon size={14} strokeWidth={2.5} /> : <AlertIcon size={14} strokeWidth={2.25} />}

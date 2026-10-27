@@ -36,7 +36,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: BRAND.themeColor,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: BRAND.themeColor },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1013" },
+  ],
+  colorScheme: "light dark",
   width: "device-width",
   initialScale: 1,
   // Sem zoom acidental (pinça/foco em campo). Leitores de tela e o "forçar zoom" de acessibilidade continuam funcionando.

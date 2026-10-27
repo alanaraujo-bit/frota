@@ -44,7 +44,7 @@ function LinkResult({ link, name }: { link: string; name: string }) {
             href={`https://wa.me/?text=${encodeURIComponent(text)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-ink px-4 text-[15px] font-medium text-white"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-ink px-4 text-[15px] font-medium text-on-solid"
           >
             Enviar pelo WhatsApp
           </a>

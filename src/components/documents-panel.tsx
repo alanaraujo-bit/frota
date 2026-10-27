@@ -144,7 +144,7 @@ function UploadForm({
 
         {phase === "done" ? (
           <div className="flex flex-col items-center py-10 text-center">
-            <span className="pop grid size-16 place-items-center rounded-full bg-ok text-white">
+            <span className="pop grid size-16 place-items-center rounded-full bg-ok text-on-solid">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="check-draw">
                 <path d="m5 12 5 5 9-10" />
               </svg>
@@ -180,7 +180,7 @@ function UploadForm({
                 <button
                   type="button"
                   onClick={() => cameraRef.current?.click()}
-                  className="flex flex-col items-center gap-2 rounded-2xl bg-ink px-3 py-5 text-white transition active:scale-[0.98]"
+                  className="flex flex-col items-center gap-2 rounded-2xl bg-ink px-3 py-5 text-on-solid transition active:scale-[0.98]"
                 >
                   <CameraIcon size={26} />
                   <span className="text-[14px] font-medium">Tirar foto</span>
@@ -210,7 +210,7 @@ function UploadForm({
                       onClick={() => chooseType(t.value)}
                       className={cx(
                         "h-11 rounded-xl text-[14px] font-medium ring-1 transition active:scale-[0.97]",
-                        type === t.value ? "bg-accent text-white ring-accent" : "bg-surface text-ink-2 ring-line-strong hover:ring-ink/30",
+                        type === t.value ? "bg-accent text-on-solid ring-accent" : "bg-surface text-ink-2 ring-line-strong hover:ring-ink/30",
                       )}
                     >
                       {t.label}
@@ -332,7 +332,7 @@ function ViewerBody({ doc, onClose }: { doc: DocItem; onClose: () => void }) {
                 <div className="flex flex-col items-center gap-3 px-6 py-14 text-center md:hidden">
                   <DocGlyph mime={doc.mime} className="size-16" />
                   <p className="text-sm text-muted">No celular, o PDF abre no visualizador do aparelho.</p>
-                  <a href={url} target="_blank" rel="noopener" className="inline-flex h-11 items-center gap-2 rounded-xl bg-ink px-5 font-medium text-white">
+                  <a href={url} target="_blank" rel="noopener" className="inline-flex h-11 items-center gap-2 rounded-xl bg-ink px-5 font-medium text-on-solid">
                     <ExternalIcon size={18} /> Abrir PDF
                   </a>
                 </div>
@@ -435,7 +435,7 @@ export function DocumentsPanel({ vehicleId, docs, isAdmin }: { vehicleId: string
             onClick={() => openUpload()}
             className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-line-strong bg-surface/60 px-6 py-10 text-center transition hover:border-accent hover:bg-accent-soft/30"
           >
-            <span className="grid size-12 place-items-center rounded-2xl bg-ink text-white">
+            <span className="grid size-12 place-items-center rounded-2xl bg-ink text-on-solid">
               <CameraIcon size={22} />
             </span>
             <span className="text-[15px] font-semibold">Guarde o primeiro documento</span>

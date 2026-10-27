@@ -79,7 +79,7 @@ export function AppNav({ isAdmin, name }: { isAdmin: boolean; name: string }) {
               href="/conta"
               transitionTypes={["nav-tab"]}
               aria-label="Minha conta"
-              className="grid size-9 place-items-center rounded-full bg-ink text-xs font-semibold tracking-wide text-white"
+              className="grid size-9 place-items-center rounded-full bg-ink text-xs font-semibold tracking-wide text-on-solid"
             >
               {initials}
             </Link>

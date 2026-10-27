@@ -21,7 +21,7 @@ function Steps({ items }: { items: React.ReactNode[] }) {
     <ol className="space-y-3">
       {items.map((s, i) => (
         <li key={i} className="flex gap-3 text-[15px]">
-          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-ink text-xs font-semibold text-white">{i + 1}</span>
+          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-ink text-xs font-semibold text-on-solid">{i + 1}</span>
           <span className="pt-0.5">{s}</span>
         </li>
       ))}
@@ -76,7 +76,7 @@ export function InstallGuide() {
   if (installed)
     return (
       <Card className="flex items-center gap-4 p-6">
-        <span className="pop grid size-12 place-items-center rounded-full bg-ok text-white">
+        <span className="pop grid size-12 place-items-center rounded-full bg-ok text-on-solid">
           <CheckIcon size={24} />
         </span>
         <div>

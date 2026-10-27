@@ -38,13 +38,13 @@ export function ServiceWorker() {
   return (
     <div
       role="status"
-      className="fade-in fixed inset-x-4 bottom-[calc(var(--tabbar-space)+8px)] z-50 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm text-white shadow-xl md:bottom-6"
+      className="fade-in fixed inset-x-4 bottom-[calc(var(--tabbar-space)+8px)] z-50 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm text-on-solid shadow-xl md:bottom-6"
     >
       <span className="flex-1">Nova versão disponível.</span>
       <button
         type="button"
         onClick={() => waiting.postMessage("SKIP_WAITING")}
-        className="rounded-lg bg-white px-3 py-1.5 font-medium text-ink hover:bg-white/90"
+        className="rounded-lg bg-surface px-3 py-1.5 font-medium text-ink hover:bg-surface-2"
       >
         Atualizar
       </button>

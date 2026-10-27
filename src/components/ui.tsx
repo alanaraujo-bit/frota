@@ -10,11 +10,11 @@ const buttonBase =
   "inline-flex select-none items-center justify-center gap-2 rounded-xl font-medium transition-[background,color,box-shadow,transform] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
 const sizes = { md: "h-11 px-4 text-[15px]", sm: "h-9 px-3 text-sm", lg: "h-12 px-5 text-base" };
 const variants = {
-  primary: "bg-ink text-white hover:bg-ink-2 shadow-[0_1px_0_rgb(255_255_255/0.08)_inset,0_1px_2px_rgb(20_22_27/0.2)]",
-  accent: "bg-accent text-white hover:bg-accent-hover",
+  primary: "bg-ink text-on-solid hover:bg-ink-2 shadow-[0_1px_0_rgb(255_255_255/0.08)_inset,0_1px_2px_rgb(20_22_27/0.2)]",
+  accent: "bg-accent text-on-solid hover:bg-accent-hover",
   secondary: "bg-surface text-ink ring-1 ring-line-strong hover:bg-surface-2 hover:ring-ink/30",
   ghost: "text-ink-2 hover:bg-ink/[0.05]",
-  danger: "bg-danger text-white hover:brightness-110",
+  danger: "bg-danger text-on-solid hover:brightness-110",
 };
 
 type BtnOpts = { variant?: keyof typeof variants; size?: keyof typeof sizes };
@@ -97,8 +97,9 @@ export function Plate({ plate, size = "md" }: { plate: string; size?: "sm" | "md
       className={cx(
         "inline-flex flex-col overflow-hidden text-center font-mono font-bold leading-none tracking-[0.06em] text-ink",
         s.box,
-        fmt === "mercosul" && "bg-white ring-[1.5px] ring-ink/80",
-        fmt === "antiga" && "bg-[#e9e9e6] ring-[1.5px] ring-ink/70",
+        // Placa física: mesmas cores nos dois temas.
+        fmt === "mercosul" && "bg-white ring-[1.5px] ring-ink/80 [--ink:#14161b]",
+        fmt === "antiga" && "bg-[#e9e9e6] ring-[1.5px] ring-ink/70 [--ink:#14161b]",
         fmt === "invalida" && "bg-warn-soft text-warn outline-dashed outline-[1.5px] outline-warn",
       )}
     >
