@@ -13,8 +13,10 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "any",
-    background_color: BRAND.backgroundColor,
-    theme_color: BRAND.themeColor,
+    // O manifest não tem variante por tema e o Android pinta a barra de navegação com estas cores:
+    // escuro fica bom nos dois temas; claro brigava com o modo escuro.
+    background_color: BRAND.themeColorDark,
+    theme_color: BRAND.themeColorDark,
     categories: ["business", "productivity"],
     icons: [
       { src: "/icons/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },

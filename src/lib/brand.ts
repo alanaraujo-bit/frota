@@ -4,5 +4,5 @@ export const BRAND = {
   name: "FROTA",
   description: "Cadastro, consulta e arquivo documental de veículos.",
   themeColor: "#f4f4f1",
-  backgroundColor: "#f4f4f1",
+  themeColorDark: "#0e1013",
 };
