@@ -81,6 +81,8 @@
 }
 
 html {
+  /* O Chrome do Android pinta a barra de navegação do app instalado com o fundo do elemento raiz. */
+  background: var(--bg);
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
   /* Sem zoom de duplo toque e sem "elástico"/puxar-para-atualizar do navegador. */
