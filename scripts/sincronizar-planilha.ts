@@ -4,6 +4,7 @@
 // Regras:
 // - Veículo casa pela placa normalizada (a linha da planilha muda entre versões; a placa não).
 // - Casou: os campos da planilha são sobrescritos e o veículo é desarquivado. Observações e documentos ficam.
+//   Exceção: campos que alguém editou no app (pelo histórico) mantêm o valor do app.
 // - Não casou: é criado. Veículo vindo da planilha antiga que sumiu da nova: arquivado (nunca apagado).
 // - Veículos cadastrados só no app (sem origem na planilha) e sem placa na planilha: não são tocados.
 import "dotenv/config";
@@ -32,7 +33,7 @@ function changes(before: Record<string, unknown>, after: Record<string, unknown>
   return out;
 }
 // sheetReferenceAt vem do banco como Date e da planilha como Date: compara pelo dia.
-const norm = (v: Record<string, unknown>) => ({
+const norm = (v: Record<string, unknown>): Record<string, unknown> => ({
   ...v,
   sheetReferenceAt: v.sheetReferenceAt instanceof Date ? v.sheetReferenceAt.toISOString().slice(0, 10) : v.sheetReferenceAt,
 });
@@ -44,17 +45,36 @@ async function main() {
 
   const groups = await db.group.findMany();
   const vehicles = await db.vehicle.findMany({ include: { group: { select: { name: true } } } });
+  // Campos que alguém editou no app (pelo histórico) não são sobrescritos: a planilha não tem esses complementos.
   const userEdits = await db.auditLog.findMany({
     where: { entity: "vehicle", action: "update", userId: { not: null } },
-    select: { entityId: true },
+    select: { entityId: true, data: true },
   });
-  const editedInApp = new Set(userEdits.map((e) => e.entityId));
+  const editedFields = new Map<string, Set<string>>();
+  for (const e of userEdits) {
+    if (!e.entityId || !e.data || typeof e.data !== "object") continue;
+    const set = editedFields.get(e.entityId) ?? new Set<string>();
+    for (const k of Object.keys(e.data)) set.add(k);
+    editedFields.set(e.entityId, set);
+  }
+  // plateKey/plateNeedsReview acompanham a placa; groupId acompanha a aba da planilha.
+  const keep = (id: string) => [...(editedFields.get(id) ?? [])].filter((k) => !["plateKey", "plateNeedsReview"].includes(k));
+  const sheetData = (v: SeedFile["veiculos"][number], groupId: string, id?: string) => {
+    const d: Record<string, unknown> = vehicleData(v, groupId, data.fonte);
+    if (id) for (const k of keep(id)) if (k in d && k !== "sourceKey" && k !== "sourceRaw") delete d[k];
+    if (id && keep(id).includes("plate")) {
+      delete d.plateKey;
+      delete d.plateNeedsReview;
+    }
+    return d as ReturnType<typeof vehicleData>;
+  };
 
   const plan = {
     groupsCreate: [] as SeedFile["grupos"],
     groupsUpdate: [] as { id: string; data: ReturnType<typeof groupData>; diff: object }[],
     create: [] as SeedFile["veiculos"],
-    update: [] as { id: string; plate: string; v: SeedFile["veiculos"][number]; diff: Record<string, unknown>; restore: boolean; overwritesAppEdit: boolean }[],
+    update: [] as { id: string; plate: string; v: SeedFile["veiculos"][number]; diff: Record<string, unknown>; restore: boolean }[],
+    kept: [] as { plate: string; fields: string[] }[],
     archive: [] as { id: string; plate: string; group: string; sourceKey: string }[],
   };
 
@@ -80,9 +100,12 @@ async function main() {
     }
     used.add(match.id);
     const groupId = groups.find((g) => g.sourceKey === v.grupo)?.id ?? `novo:${v.grupo}`;
-    const d = changes(norm(match), norm(vehicleData(v, groupId, data.fonte)));
+    const d = changes(norm(match), norm(sheetData(v, groupId, match.id)));
+    const sheet = norm(vehicleData(v, groupId, data.fonte));
+    const kept = keep(match.id).filter((k) => k in sheet && !same(norm(match)[k], sheet[k]));
+    if (kept.length) plan.kept.push({ plate: match.plate, fields: kept });
     if (Object.keys(d).length || match.archivedAt)
-      plan.update.push({ id: match.id, plate: match.plate, v, diff: d, restore: !!match.archivedAt, overwritesAppEdit: editedInApp.has(match.id) });
+      plan.update.push({ id: match.id, plate: match.plate, v, diff: d, restore: !!match.archivedAt });
   }
 
   for (const x of vehicles)
@@ -102,8 +125,11 @@ async function main() {
   console.log(`Veículos com dados alterados: ${real.length} (mais ${plan.update.length - real.length} só com posição/linha na planilha)`);
   for (const [k, n] of Object.entries(fieldCount).sort((a, b) => b[1] - a[1])) console.log(`  ${k}: ${n}`);
   for (const u of real.filter((u) => u.restore)) console.log(`  ↺ ${u.plate} volta do arquivo`);
-  const lost = real.filter((u) => u.overwritesAppEdit);
-  console.log(`Veículos editados no app que a planilha vai sobrescrever: ${lost.length}${lost.map((u) => `\n  ! ${u.plate}: ${Object.keys(u.diff).filter((k) => !["sourceKey", "sourceRaw", "sheetOrder"].includes(k)).join(", ")}`).join("")}`);
+  console.log(`Veículos com edições do app preservadas (a planilha difere nesses campos): ${plan.kept.length}${plan.kept.map((k) => `\n  = ${k.plate}: ${k.fields.join(", ")}`).join("")}`);
+  if (flags.includes("--detalhes"))
+    for (const u of real)
+      for (const [k, d] of Object.entries(u.diff as Record<string, { de: unknown; para: unknown }>))
+        if (!["sourceKey", "sourceRaw", "sheetOrder"].includes(k)) console.log(`    ${u.plate}.${k}: banco=${JSON.stringify(d.de)}  planilha=${JSON.stringify(d.para)}`);
   console.log(`Veículos a arquivar (sumiram da planilha): ${plan.archive.length}${plan.archive.map((a) => `\n  - ${a.plate} (${a.group})`).join("")}`);
 
   if (!apply) {
@@ -131,7 +157,7 @@ async function main() {
         await tx.auditLog.create({ data: { action: "archive", entity: "vehicle", entityId: a.id, data: { motivo: "fora da planilha final" } } });
       }
       for (const u of plan.update) {
-        const d = vehicleData(u.v, groupIds.get(u.v.grupo)!, data.fonte);
+        const d = sheetData(u.v, groupIds.get(u.v.grupo)!, u.id);
         await tx.vehicle.update({ where: { id: u.id }, data: { ...d, archivedAt: null } });
         const visible = Object.fromEntries(Object.entries(u.diff).filter(([k]) => !["sourceKey", "sourceRaw", "sheetOrder", "groupId"].includes(k)));
         if (Object.keys(visible).length || u.restore)
