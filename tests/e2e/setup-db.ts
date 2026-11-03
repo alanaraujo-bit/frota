@@ -29,7 +29,7 @@ async function main() {
   await db.$executeRawUnsafe('TRUNCATE "AuditLog","VehicleView","Document","Vehicle","Group","LoginAttempt","Invite","Session","User" CASCADE');
   rmSync(path.join(__dirname, "..", "..", ".storage-e2e"), { recursive: true, force: true });
   const seed = await runSeed(db);
-  if (seed.vehicles !== 85 || seed.groups !== 7) throw new Error(`Seed inesperado: ${JSON.stringify(seed)}`);
+  if (seed.vehicles !== 102 || seed.groups !== 8) throw new Error(`Seed inesperado: ${JSON.stringify(seed)}`);
 
   // Credenciais de teste geradas a cada execução (nunca reaproveitadas fora do E2E).
   const creds = {

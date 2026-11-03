@@ -19,19 +19,19 @@ beforeAll(async () => {
 afterAll(() => db?.$disconnect());
 
 describe("seed da planilha", () => {
-  it("arquivo de seed tem 85 veículos em 7 grupos", () => {
+  it("arquivo de seed tem 102 veículos em 8 grupos", () => {
     const data = loadSeedFile();
-    expect(data.grupos).toHaveLength(7);
-    expect(data.veiculos).toHaveLength(85);
+    expect(data.grupos).toHaveLength(8);
+    expect(data.veiculos).toHaveLength(102);
   });
 
-  it("importa 85 veículos e 7 grupos, e não duplica numa nova execução", async () => {
+  it("importa 102 veículos e 8 grupos, e não duplica numa nova execução", async () => {
     const first = await runSeed(db);
-    expect(first).toMatchObject({ groupsCreated: 7, vehiclesCreated: 85, groups: 7, vehicles: 85 });
+    expect(first).toMatchObject({ groupsCreated: 8, vehiclesCreated: 102, groups: 8, vehicles: 102 });
     const second = await runSeed(db);
-    expect(second).toMatchObject({ groupsCreated: 0, vehiclesCreated: 0, groups: 7, vehicles: 85 });
-    expect(await db.vehicle.count()).toBe(85);
-    expect(await db.group.count()).toBe(7);
+    expect(second).toMatchObject({ groupsCreated: 0, vehiclesCreated: 0, groups: 8, vehicles: 102 });
+    expect(await db.vehicle.count()).toBe(102);
+    expect(await db.group.count()).toBe(8);
   });
 
   it("preserva a placa anômala sem corrigir e sinaliza para revisão", async () => {
@@ -53,7 +53,7 @@ describe("seed da planilha", () => {
     expect(v.sheetReference).toBe("MAIO");
     expect(v.sheetReferenceAt).toBeNull();
     const legacy = await db.vehicle.groupBy({ by: ["legacyStatus"], _count: true });
-    expect(Object.fromEntries(legacy.map((l) => [l.legacyStatus ?? "vazio", l._count]))).toEqual({ OK: 69, vazio: 11, ATRASADO: 4, PENDENTE: 1 });
+    expect(Object.fromEntries(legacy.map((l) => [l.legacyStatus ?? "vazio", l._count]))).toEqual({ OK: 74, vazio: 11, ATRASADO: 16, PENDENTE: 1 });
   });
 
   it("edição feita no app sobrevive a uma nova execução do seed", async () => {

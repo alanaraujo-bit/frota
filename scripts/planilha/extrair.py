@@ -61,11 +61,14 @@ def extrair(caminho):
         cab_idx = next(i for i, r in enumerate(linhas) if any(
             c.value is not None and rotulo(c.value) in ("PLACA", "PLACAS") for c in r))
         titulo_row = linhas[cab_idx - 1]
-        titulo = next(limpo(c.value) for c in titulo_row if c.value is not None
-                      and (CNPJ.search(str(c.value)) or CPF.search(str(c.value))))
-        doc = (CNPJ.search(titulo) or CPF.search(titulo)).group(0)
-        tipo_doc = "CNPJ" if CNPJ.search(titulo) else "CPF"
-        nome = re.sub(r"^VEICULOS\s*", "", titulo.replace(doc, "")).strip(" -")
+        preenchidas = [c for c in titulo_row if c.value is not None]
+        # Título: a célula com CNPJ/CPF; sem documento (titular pessoa sem CPF na planilha), a primeira preenchida.
+        titulo_cel = next((c for c in preenchidas if CNPJ.search(str(c.value)) or CPF.search(str(c.value))), preenchidas[0])
+        titulo = limpo(titulo_cel.value)
+        achado = CNPJ.search(titulo) or CPF.search(titulo)
+        doc = achado.group(0) if achado else None
+        tipo_doc = ("CNPJ" if CNPJ.search(titulo) else "CPF") if doc else None
+        nome = re.sub(r"^VEICULOS\s*", "", titulo.replace(doc, "") if doc else titulo).strip(" -")
         nome = re.sub(r"\s+-\s*$", "", nome).strip()
         grupo_chave = ws.title.strip()
         grupos.append({
@@ -83,7 +86,7 @@ def extrair(caminho):
                 extras[c.column_letter] = limpo(c.value)
         for c in titulo_row:
             if c.value is not None and c.column_letter not in mapa and c.column_letter not in extras \
-                    and not (CNPJ.search(str(c.value)) or CPF.search(str(c.value))):
+                    and c.coordinate != titulo_cel.coordinate:
                 extras[c.column_letter] = limpo(c.value)
         col_placa = next(k for k, v in mapa.items() if v == "placa")
         if "chassi" not in mapa.values():
@@ -135,7 +138,7 @@ def diagnostico(grupos, veiculos):
            "| # | Aba | Titular | Documento | Veículos |", "|---|---|---|---|---|"]
     por_grupo = Counter(v["grupo"] for v in veiculos)
     for g in grupos:
-        out.append(f"| {g['ordem']} | `{g['aba']}` | {g['nome']} | {g['tipoDocumento']} | {por_grupo[g['chave']]} |")
+        out.append(f"| {g['ordem']} | `{g['aba']}` | {g['nome']} | {g['tipoDocumento'] or '—'} | {por_grupo[g['chave']]} |")
     out += ["", "## Anomalias sinalizadas (não corrigidas)", ""]
     for v in veiculos:
         for a in v["alertas"]:

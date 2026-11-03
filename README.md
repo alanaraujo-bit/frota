@@ -17,7 +17,7 @@ npm install
 cp .env.example .env          # preencha SESSION_SECRET e FILE_MASTER_KEY (comandos no arquivo)
 npm run db:local              # terminal 1: Postgres local na porta 5433 (deixe aberto)
 npx prisma migrate deploy     # terminal 2
-npm run db:seed               # importa a planilha: 7 grupos, 85 veículos
+npm run db:seed               # importa a planilha: 8 grupos, 102 veículos
 npm run admin:criar -- --email voce@empresa.com --nome "Seu Nome"
 npm run dev -- -p 3100        # abra o link impresso pelo admin:criar para definir a senha
 ```
