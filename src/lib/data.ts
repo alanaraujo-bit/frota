@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import type { SearchItem } from "@/lib/search";
+import { responsibleOf, type SearchItem } from "@/lib/search";
 
 export async function getSearchIndex(includeArchived: boolean): Promise<SearchItem[]> {
   const rows = await db.vehicle.findMany({
@@ -14,6 +14,7 @@ export async function getSearchIndex(includeArchived: boolean): Promise<SearchIt
       legacyStatus: true,
       archivedAt: true,
       plateNeedsReview: true,
+      contacts: true,
       group: { select: { id: true, name: true } },
     },
     orderBy: { plate: "asc" },
@@ -27,6 +28,7 @@ export async function getSearchIndex(includeArchived: boolean): Promise<SearchIt
     legacyStatus: r.legacyStatus,
     group: r.group.name,
     groupId: r.group.id,
+    responsible: responsibleOf(r.contacts),
     archived: !!r.archivedAt,
     needsReview: r.plateNeedsReview,
   }));

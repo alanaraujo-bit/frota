@@ -30,29 +30,28 @@
   --tabbar-space: calc(88px + var(--safe-bottom));
 }
 
-/* Tema escuro: segue o sistema. Mesma hierarquia do claro; preenchimentos sólidos ficam claros com texto escuro. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg: #0e1013;
-    --surface: #171a1f;
-    --surface-2: #1d2026;
-    --ink: #eceef1;
-    --ink-2: #c5c9d1;
-    --muted: #9198a5;
-    --line: #262a31;
-    --line-strong: #353a43;
-    --accent: #4fb8a9;
-    --accent-hover: #6ccbbd;
-    --accent-soft: #12302c;
-    --warn: #e8b55a;
-    --warn-soft: #2e2512;
-    --danger: #f08a7f;
-    --danger-soft: #3a1b18;
-    --ok: #6cc98c;
-    --ok-soft: #15291c;
-    --on-solid: #0e1013;
-  }
+/* Tema escuro: data-theme vem do script do layout (escolha do usuário ou tema do sistema).
+   Mesma hierarquia do claro; preenchimentos sólidos ficam claros com texto escuro. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e1013;
+  --surface: #171a1f;
+  --surface-2: #1d2026;
+  --ink: #eceef1;
+  --ink-2: #c5c9d1;
+  --muted: #9198a5;
+  --line: #262a31;
+  --line-strong: #353a43;
+  --accent: #4fb8a9;
+  --accent-hover: #6ccbbd;
+  --accent-soft: #12302c;
+  --warn: #e8b55a;
+  --warn-soft: #2e2512;
+  --danger: #f08a7f;
+  --danger-soft: #3a1b18;
+  --ok: #6cc98c;
+  --ok-soft: #15291c;
+  --on-solid: #0e1013;
 }
 
 @theme inline {
@@ -172,7 +171,7 @@ dialog.sheet::backdrop {
   background: rgb(20 22 27 / 0.42);
   backdrop-filter: blur(2px);
 }
-@media (prefers-color-scheme: dark) {
+:root[data-theme="dark"] {
   dialog.sheet::backdrop {
     background: rgb(0 0 0 / 0.6);
   }
@@ -305,7 +304,7 @@ dialog.sheet[open] {
     background: rgb(250 250 248 / 0.97);
   }
 }
-@media (prefers-color-scheme: dark) {
+:root[data-theme="dark"] {
   .glass {
     background: linear-gradient(180deg, rgb(36 40 47 / 0.72), rgb(23 26 31 / 0.55));
     border-color: rgb(255 255 255 / 0.09);

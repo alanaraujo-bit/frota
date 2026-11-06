@@ -12,6 +12,7 @@ import { plateConflicts, type Alert, type Contact } from "@/lib/data";
 import { db } from "@/lib/db";
 import { documentTypeLabel } from "@/lib/files";
 import { displayPlate } from "@/lib/plate";
+import { responsibleOf } from "@/lib/search";
 
 export async function generateMetadata({ params }: PageProps<"/veiculos/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -62,6 +63,7 @@ export default async function VehiclePage({ params }: PageProps<"/veiculos/[id]"
 
   const conflicts = await plateConflicts(v.plateKey, v.id);
   const contacts = (v.contacts as Contact[]) ?? [];
+  const responsible = responsibleOf(contacts);
   const alerts = (v.alerts as Alert[]) ?? [];
   const raw = v.sourceRaw as { aba: string; linha: number; celulas: Record<string, string> } | null;
   const docs: DocItem[] = v.documents.map((d) => ({
@@ -96,6 +98,11 @@ export default async function VehiclePage({ params }: PageProps<"/veiculos/[id]"
             </Link>
             {[v.year, v.color].filter(Boolean).length > 0 && <> · {[v.year, v.color].filter(Boolean).join(" · ")}</>}
           </p>
+          {responsible && (
+            <p className="mt-1 text-[15px] text-ink-2">
+              Responsável: <span className="font-medium text-ink">{responsible}</span>
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-1.5">
             {v.legacyStatus && <LegacyStatus value={v.legacyStatus} />}
             {v.plateNeedsReview && <Badge tone="warn">Placa para revisar</Badge>}

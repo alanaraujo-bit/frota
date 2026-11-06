@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { displayPlate, plateAlternate, plateFormat, plateKey } from "@/lib/plate";
-import { searchVehicles, type SearchItem } from "@/lib/search";
+import { responsibleOf, searchVehicles, type SearchItem } from "@/lib/search";
 
 const item = (over: Partial<SearchItem>): SearchItem => ({
   id: over.plate ?? "x",
@@ -10,6 +10,7 @@ const item = (over: Partial<SearchItem>): SearchItem => ({
   makeModel: null,
   group: "G",
   groupId: "g",
+  responsible: null,
   legacyStatus: null,
   archived: false,
   needsReview: false,
@@ -67,6 +68,22 @@ describe("busca", () => {
   });
   it("acha por modelo e grupo, sem acento", () => {
     expect(searchVehicles(items, "t cross")[0].item.plate).toBe("RES1J06");
+  });
+  it("acha pelo responsável, sem acento", () => {
+    const r = searchVehicles([...items, item({ plate: "TVO5C12", responsible: "SECRETARIA DA AGRICULTURA · RAFAEL" })], "rafael");
+    expect(r[0].item.plate).toBe("TVO5C12");
+    expect(r[0].field).toBe("responsavel");
+  });
+  it("responsável junta nomes, tira telefones e repetidos", () => {
+    expect(
+      responsibleOf([
+        { rotulo: "RESPONSÁVEL", valor: "ANUAR FILHO" },
+        { rotulo: "CONTATO", valor: "(94)99162-1344" },
+        { rotulo: "RESPONSAVÉL", valor: "anuar filho" },
+        { rotulo: "X", valor: "ROBSON" },
+      ]),
+    ).toBe("ANUAR FILHO · ROBSON");
+    expect(responsibleOf([])).toBeNull();
   });
   it("busca vazia retorna nada", () => {
     expect(searchVehicles(items, "  - ")).toEqual([]);

@@ -74,7 +74,7 @@ export function VehicleList({ items, groups, isAdmin }: { items: ListItem[]; gro
             type="search"
             autoCapitalize="characters"
             autoComplete="off"
-            placeholder="Filtrar por placa, modelo, RENAVAM…"
+            placeholder="Filtrar por placa, modelo, RENAVAM, responsável…"
             className={cx(inputClass, "h-11 pl-10")}
           />
         </label>
@@ -148,6 +148,7 @@ export function VehicleList({ items, groups, isAdmin }: { items: ListItem[]; gro
                   <th className="px-4 py-3 font-medium">Placa</th>
                   <th className="px-4 py-3 font-medium">Veículo</th>
                   <th className="px-4 py-3 font-medium">Grupo</th>
+                  <th className="px-4 py-3 font-medium">Responsável</th>
                   <th className="px-4 py-3 font-medium">RENAVAM</th>
                   <th className="px-4 py-3 font-medium">Vistoria</th>
                   <th className="px-4 py-3 font-medium">Situação</th>
@@ -166,6 +167,7 @@ export function VehicleList({ items, groups, isAdmin }: { items: ListItem[]; gro
                     </td>
                     <td className="max-w-[240px] truncate px-4 py-2.5 font-medium">{v.makeModel ?? "—"}</td>
                     <td className="max-w-[200px] truncate px-4 py-2.5 text-ink-2">{v.group}</td>
+                    <td className="max-w-[220px] truncate px-4 py-2.5 text-ink-2" title={v.responsible ?? undefined}>{v.responsible ?? <span className="text-muted">—</span>}</td>
                     <td className="px-4 py-2.5 font-mono text-[13px] tabular text-ink-2">{v.renavam ?? "—"}</td>
                     <td className="px-4 py-2.5 text-ink-2">{v.inspection ?? "—"}</td>
                     <td className="px-4 py-2.5">
@@ -192,7 +194,7 @@ export function VehicleList({ items, groups, isAdmin }: { items: ListItem[]; gro
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[15px] font-medium">{v.makeModel ?? "—"}</span>
                     <span className="flex items-center gap-1.5 truncate text-[13px] text-muted">
-                      <span className="truncate">{v.group}</span>
+                      <span className="truncate">{v.responsible ?? v.group}</span>
                       {v.docs > 0 && (
                         <span className="inline-flex shrink-0 items-center gap-0.5">
                           · <FileIcon size={12} /> {v.docs}

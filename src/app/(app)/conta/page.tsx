@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { ChangePasswordForm } from "@/components/auth-forms";
+import { ThemePicker } from "@/components/theme-picker";
 import { ChevronRight, ClockIcon, LayersIcon, LogoutIcon, PhoneDeviceIcon, UsersIcon } from "@/components/icons";
 import { Badge, Button, Card, PageHeader } from "@/components/ui";
 import { requireUser } from "@/lib/auth/dal";
@@ -40,6 +41,11 @@ export default async function AccountPage() {
           {isAdmin && <NavRow href="/usuarios" icon={UsersIcon} label="Usuários e convites" />}
           {isAdmin && <NavRow href="/auditoria" icon={ClockIcon} label="Histórico de alterações" />}
         </ul>
+      </Card>
+
+      <Card className="p-5 md:p-6">
+        <h2 className="mb-4 text-[15px] font-semibold">Aparência</h2>
+        <ThemePicker />
       </Card>
 
       <Card className="p-5 md:p-6">

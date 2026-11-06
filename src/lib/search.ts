@@ -8,12 +8,25 @@ export type SearchItem = {
   makeModel: string | null;
   group: string;
   groupId: string;
+  responsible: string | null;
   legacyStatus: string | null;
   archived: boolean;
   needsReview: boolean;
 };
 
-export type SearchHit = { item: SearchItem; score: number; field: "placa" | "renavam" | "chassi" | "texto" };
+const PHONE = /^\(?\d{2}\)?\s?9?\d{4}-?\d{4}$/;
+
+/** Nomes/setores dos contatos (sem telefones), sem repetir: "SECRETARIA · RAFAEL". */
+export function responsibleOf(contacts: unknown): string | null {
+  const seen = new Map<string, string>();
+  for (const c of Array.isArray(contacts) ? (contacts as { valor?: string }[]) : []) {
+    const v = c?.valor?.trim();
+    if (v && !PHONE.test(v) && !seen.has(fold(v))) seen.set(fold(v), v);
+  }
+  return seen.size ? [...seen.values()].join(" · ") : null;
+}
+
+export type SearchHit = { item: SearchItem; score: number; field: "placa" | "renavam" | "chassi" | "responsavel" | "texto" };
 
 function fold(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -50,11 +63,12 @@ function scoreOne(item: SearchItem, q: string, qAlt: string | null, qDigits: str
   if (qText.length >= 2) {
     if (item.makeModel && fold(item.makeModel).includes(qText)) take(20, "texto");
     else if (fold(item.group).includes(qText)) take(15, "texto");
+    if (item.responsible && fold(item.responsible).includes(qText)) take(25, "responsavel");
   }
   return best;
 }
 
-/** Busca tolerante: placa (antiga/Mercosul, com ou sem hífen), RENAVAM, chassi, modelo ou grupo. */
+/** Busca tolerante: placa (antiga/Mercosul, com ou sem hífen), RENAVAM, chassi, responsável, modelo ou grupo. */
 export function searchVehicles(items: SearchItem[], query: string, limit = 50): SearchHit[] {
   const q = plateKey(query);
   if (!q) return [];

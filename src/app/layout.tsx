@@ -51,9 +51,15 @@ export const viewport: Viewport = {
   interactiveWidget: "resizes-content",
 };
 
+// Roda antes da primeira pintura (sem piscar): tema salvo no aparelho ("claro"/"escuro") ou o do sistema.
+const THEME_SCRIPT = `(function(){var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(t){if(t===undefined){try{t=localStorage.getItem("tema")}catch(e){}}var e=t==="escuro"||(t!=="claro"&&m.matches);d.dataset.theme=e?"dark":"light";document.querySelectorAll('meta[name="theme-color"]').forEach(function(x){x.content=e?"${BRAND.themeColorDark}":"${BRAND.themeColor}"})}window.aplicarTema=a;a();m.addEventListener("change",function(){a()});document.addEventListener("DOMContentLoaded",function(){a()})})()`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-dvh">
         <div className="ambient" aria-hidden="true" />
         {children}

@@ -13,6 +13,7 @@ import { Badge, ButtonLink, LegacyStatus, Plate, cx } from "./ui";
 function matchHint(h: SearchHit) {
   if (h.field === "renavam") return `RENAVAM ${h.item.renavam}`;
   if (h.field === "chassi") return `Chassi ${h.item.chassis}`;
+  if (h.field === "responsavel") return `Responsável: ${h.item.responsible}`;
   return null;
 }
 

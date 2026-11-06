@@ -6,6 +6,7 @@ import { ButtonLink, PageHeader } from "@/components/ui";
 import { VehicleList, type ListItem } from "@/components/vehicle-list";
 import { requireUser } from "@/lib/auth/dal";
 import { db } from "@/lib/db";
+import { responsibleOf } from "@/lib/search";
 
 export const metadata: Metadata = { title: "Veículos" };
 
@@ -27,6 +28,7 @@ export default async function VehiclesPage() {
         inspection: true,
         archivedAt: true,
         plateNeedsReview: true,
+        contacts: true,
         group: { select: { id: true, name: true } },
         _count: { select: { documents: { where: { status: "PRONTO", deletedAt: null } } } },
       },
@@ -49,6 +51,7 @@ export default async function VehiclesPage() {
     inspection: v.inspection,
     group: v.group.name,
     groupId: v.group.id,
+    responsible: responsibleOf(v.contacts),
     archived: !!v.archivedAt,
     needsReview: v.plateNeedsReview,
     docs: v._count.documents,
